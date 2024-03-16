@@ -34,20 +34,23 @@ function waitForClick(event: MouseEvent) {
             dest = dest.parentElement as HTMLButtonElement
         }
         afterClick(target as HTMLButtonElement, dest as HTMLButtonElement)
+        boardElement.removeEventListener("click", clickReact)
+        boardElement.addEventListener("click", waitForClick)
     }
 
     boardElement.addEventListener("click", clickReact)
 
-    return clickReact
+    
 }
 
 function afterClick(src: HTMLButtonElement, dest: HTMLButtonElement) {
     if(board[Number(src.id)].pieceColor === board[Number(dest.id)].pieceColor)
         console.log("same color")
     else
-        console.log("not same color");
-
-    boardElement.removeEventListener("click", )
+        console.log("not same color")
+    
+    let img = src.children[0] as HTMLImageElement
+    img.style.opacity = "1"
 }
 
 boardElement.addEventListener("click", waitForClick)

@@ -25,15 +25,17 @@ function waitForClick(event) {
             dest = dest.parentElement;
         }
         afterClick(target, dest);
+        boardElement.removeEventListener("click", clickReact);
+        boardElement.addEventListener("click", waitForClick);
     }
     boardElement.addEventListener("click", clickReact);
-    return clickReact;
 }
 function afterClick(src, dest) {
     if (board[Number(src.id)].pieceColor === board[Number(dest.id)].pieceColor)
         console.log("same color");
     else
         console.log("not same color");
-    boardElement.removeEventListener("click");
+    let img = src.children[0];
+    img.style.opacity = "1";
 }
 boardElement.addEventListener("click", waitForClick);
