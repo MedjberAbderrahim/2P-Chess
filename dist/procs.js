@@ -34,7 +34,7 @@ function setRow(row, board, rowIndex) {
             newCell2.id = String((rowIndex - 1) * 8 + i + 1);
             newCell2.className = (rowIndex % 2) ? "cell black" : "cell white";
             board[(rowIndex - 1) * 8 + i + 1] = setCell(rowIndex, (rowIndex % 2) ? cellColor.white : cellColor.black, (rowIndex === 2) ? cellValue.wPawn : (rowIndex === 7) ? cellValue.bPawn : cellValue.empty, newCell2);
-            newCell.innerHTML = newCell2.innerHTML = (rowIndex === 2) ? `<image src="images/pieces/white-pawn.png">` : (rowIndex === 7) ? `<image src="images/pieces/black-pawn.png">` : "";
+            newCell.innerHTML = newCell2.innerHTML = (rowIndex === 2) ? `<image src="Images/pieces/white-pawn.png">` : (rowIndex === 7) ? `<image src="Images/pieces/black-pawn.png">` : "";
             row.append(newCell, newCell2);
         }
         return;
@@ -42,42 +42,42 @@ function setRow(row, board, rowIndex) {
     let Cell1 = document.createElement("button");
     Cell1.id = String((rowIndex - 1) * 8 + 0);
     Cell1.className = (rowIndex === 1) ? "cell white" : "cell black";
-    Cell1.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-rook.png">` : `<image src="images/pieces/black-rook.png">`;
+    Cell1.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-rook.png">` : `<image src="Images/pieces/black-rook.png">`;
     board[(rowIndex - 1) * 8 + 0] = setCell(rowIndex, (rowIndex === 1) ? cellColor.white : cellColor.black, (rowIndex === 1) ? cellValue.wRook : cellValue.bRook, Cell1);
     let Cell2 = document.createElement("button");
     Cell2.id = String((rowIndex - 1) * 8 + 1);
     Cell2.className = (rowIndex === 1) ? "cell black" : "cell white";
-    Cell2.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-knight.png">` : `<image src="images/pieces/black-knight.png">`;
+    Cell2.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-knight.png">` : `<image src="Images/pieces/black-knight.png">`;
     board[(rowIndex - 1) * 8 + 1] = setCell(rowIndex, (rowIndex === 1) ? cellColor.black : cellColor.white, (rowIndex === 1) ? cellValue.wKnight : cellValue.bKnight, Cell2);
     let Cell3 = document.createElement("button");
     Cell3.id = String((rowIndex - 1) * 8 + 2);
     Cell3.className = (rowIndex === 1) ? "cell white" : "cell black";
-    Cell3.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-bishop.png">` : `<image src="images/pieces/black-bishop.png">`;
+    Cell3.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-bishop.png">` : `<image src="Images/pieces/black-bishop.png">`;
     board[(rowIndex - 1) * 8 + 2] = setCell(rowIndex, (rowIndex === 1) ? cellColor.white : cellColor.black, (rowIndex === 1) ? cellValue.wBishop : cellValue.bBishop, Cell3);
     let Cell4 = document.createElement("button");
     Cell4.id = String((rowIndex - 1) * 8 + 3);
     Cell4.className = (rowIndex === 1) ? "cell black" : "cell white";
-    Cell4.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-king.png">` : `<image src="images/pieces/black-king.png">`;
+    Cell4.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-king.png">` : `<image src="Images/pieces/black-king.png">`;
     board[(rowIndex - 1) * 8 + 3] = setCell(rowIndex, (rowIndex === 1) ? cellColor.black : cellColor.white, (rowIndex === 1) ? cellValue.wKing : cellValue.bKing, Cell4);
     let Cell5 = document.createElement("button");
     Cell5.id = String((rowIndex - 1) * 8 + 4);
     Cell5.className = (rowIndex === 1) ? "cell white" : "cell black";
-    Cell5.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-queen.png">` : `<image src="images/pieces/black-queen.png">`;
+    Cell5.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-queen.png">` : `<image src="Images/pieces/black-queen.png">`;
     board[(rowIndex - 1) * 8 + 4] = setCell(rowIndex, (rowIndex === 1) ? cellColor.white : cellColor.black, (rowIndex === 1) ? cellValue.wQueen : cellValue.bQueen, Cell5);
     let Cell6 = document.createElement("button");
     Cell6.id = String((rowIndex - 1) * 8 + 5);
     Cell6.className = (rowIndex === 1) ? "cell black" : "cell white";
-    Cell6.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-bishop.png">` : `<image src="images/pieces/black-bishop.png">`;
+    Cell6.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-bishop.png">` : `<image src="Images/pieces/black-bishop.png">`;
     board[(rowIndex - 1) * 8 + 5] = setCell(rowIndex, (rowIndex === 1) ? cellColor.black : cellColor.white, (rowIndex === 1) ? cellValue.wBishop : cellValue.bBishop, Cell6);
     let Cell7 = document.createElement("button");
     Cell7.id = String((rowIndex - 1) * 8 + 6);
     Cell7.className = (rowIndex === 1) ? "cell white" : "cell black";
-    Cell7.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-knight.png">` : `<image src="images/pieces/black-knight.png">`;
+    Cell7.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-knight.png">` : `<image src="Images/pieces/black-knight.png">`;
     board[(rowIndex - 1) * 8 + 6] = setCell(rowIndex, (rowIndex === 1) ? cellColor.white : cellColor.black, (rowIndex === 1) ? cellValue.wKnight : cellValue.bKnight, Cell7);
     let Cell8 = document.createElement("button");
     Cell8.id = String((rowIndex - 1) * 8 + 7);
     Cell8.className = (rowIndex === 1) ? "cell black" : "cell white";
-    Cell8.innerHTML = (rowIndex === 1) ? `<image src="images/pieces/white-rook.png">` : `<image src="images/pieces/black-rook.png">`;
+    Cell8.innerHTML = (rowIndex === 1) ? `<image src="Images/pieces/white-rook.png">` : `<image src="Images/pieces/black-rook.png">`;
     board[(rowIndex - 1) * 8 + 7] = setCell(rowIndex, (rowIndex === 1) ? cellColor.black : cellColor.white, (rowIndex === 1) ? cellValue.wRook : cellValue.bRook, Cell8);
     row.append(Cell1, Cell2, Cell3, Cell4, Cell5, Cell6, Cell7, Cell8);
 }
@@ -91,6 +91,7 @@ export function setBoard(boardElement, board) {
     }
 }
 function makeMove(from, to) {
+    new Audio("Audio/move.mp3").play();
     to.value = from.value;
     to.element.innerHTML = from.element.innerHTML;
     from.element.innerHTML = "";
