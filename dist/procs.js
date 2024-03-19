@@ -1,4 +1,4 @@
-import { boardElement, board } from "./index.js";
+import { boardElement, board, side, nextTurn } from "./index.js";
 var cellColor;
 (function (cellColor) {
     cellColor["white"] = "white";
@@ -20,6 +20,20 @@ var cellValue;
     cellValue[cellValue["bQueen"] = 41] = "bQueen";
     cellValue[cellValue["bKing"] = 47] = "bKing";
 })(cellValue || (cellValue = {}));
+var moveType;
+(function (moveType) {
+    moveType[moveType["check"] = 0] = "check";
+    moveType[moveType["capture"] = 1] = "capture";
+    moveType[moveType["promote"] = 2] = "promote";
+    moveType[moveType["castle"] = 3] = "castle";
+    moveType[moveType["regularMove"] = 4] = "regularMove";
+})(moveType || (moveType = {}));
+export var gameSide;
+(function (gameSide) {
+    gameSide[gameSide["none"] = 0] = "none";
+    gameSide[gameSide["white"] = 1] = "white";
+    gameSide[gameSide["black"] = 2] = "black";
+})(gameSide || (gameSide = {}));
 function setCell(row, color, value, element) {
     return { row: row, color: color, value: value, element: element };
 }
@@ -90,33 +104,74 @@ export function setBoard(boardElement, board) {
         boardElement.append(rowElement);
     }
 }
+function isCheck(board, side) {
+    board;
+    side;
+    throw new Error("Function not implemented.");
+}
+function getMoveType(from, to) {
+    from;
+    let val = to.value;
+    if (isCheck(board, side))
+        return moveType.check;
+    if (to.value !== cellValue.empty)
+        return moveType.capture;
+    // idk why it is throwing error here:
+    // "This comparison appears to be unintentional because the types 'cellValue.empty' and 'cellValue.bPawn' have no overlap.ts(2367)"
+    // so I added "as cellValue"
+    if (((to.row === 1) && (val === cellValue.bPawn)) || ((to.row === 8) && (val === cellValue.wPawn)))
+        return moveType.promote;
+    // if(castle())   /* not yet implemented */
+    //     return moveType.castle
+    return moveType.regularMove;
+}
 function makeMove(from, to) {
-    new Audio("Audio/move.mp3").play();
     to.value = from.value;
     to.element.innerHTML = from.element.innerHTML;
     from.element.innerHTML = "";
-    from.value = 0;
+    from.value = cellValue.empty;
     let img = to.element.children[0];
     img.style.opacity = "1";
+    switch (getMoveType(from, to)) {
+        case moveType.check:
+            new Audio("Audio/check.mp3").play();
+            break;
+        case moveType.capture:
+            new Audio("Audio/capture.mp3").play();
+            break;
+        case moveType.castle:
+            new Audio("Audio/castle.mp3").play();
+            break;
+        case moveType.promote:
+            new Audio("Audio/promote.mp3").play();
+            break;
+        case moveType.regularMove:
+            new Audio("Audio/move.mp3").play();
+            break;
+        default:
+            throw new Error("ERROR! [getMoveType() in makeMove]: returned invalid value");
+    }
+    nextTurn();
 }
-function getLegalMoves(cell) {
+function getLegalMoves(cellIndex) {
+    let cell = board[cellIndex];
     cell;
     return [];
 }
-function isLegal(from, to) {
+function isLegal(fromIndex, toIndex) {
+    let from = board[fromIndex];
+    let to = board[toIndex];
     // STILL NEEDS TO CHECK IN CASE OF A CHECK
     if ((from.value & 0x30) === (to.value & 0x30))
         return false;
     // "getLegalMoves" function still not started
-    let legalMoves = getLegalMoves(from);
-    for (let i = 0; i < legalMoves.length; i++) {
-        if (to === legalMoves[i])
-            return true;
-    }
+    let legalMoves = getLegalMoves(fromIndex);
+    if (legalMoves.includes(to))
+        return true;
     return false;
 }
 function afterClick(src, dest) {
-    if (!isLegal(board[Number(src.id)], board[Number(dest.id)])) {
+    if (!isLegal(Number(src.id), Number(dest.id))) {
         alert("Invalid move!");
         let img = src.children[0];
         img.style.opacity = "1";
@@ -126,8 +181,12 @@ function afterClick(src, dest) {
 }
 export function waitForClick(event) {
     let target = event.target;
-    if (target.tagName === "BUTTON" && !target.children[0])
-        return;
+    if (target.tagName === "BUTTON") {
+        if (!target.children[0]) /* Empty cell */
+            return;
+        else if ((board[Number(target.id)].value & 0xF0) !== side) /* Enemy's piece */
+            return;
+    }
     if (target.tagName === "IMG") {
         target.style.opacity = "40%";
         if (!target.parentElement)
@@ -147,8 +206,7 @@ export function waitForClick(event) {
             dest = dest.parentElement;
         }
         afterClick(target, dest);
-        boardElement.removeEventListener("click", clickReact);
         window.postMessage("add clickReact");
     }
-    boardElement.addEventListener("click", clickReact);
+    boardElement.addEventListener("click", clickReact, { once: true });
 }
