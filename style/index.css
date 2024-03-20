@@ -46,3 +46,24 @@ img {
     background-color: var(--blackCell);
     color: var(--blackPiece);
 }
+
+.possibleMove {
+    height: 25px;
+    aspect-ratio: 1 / 1;
+    background-color: gray;
+    border: none;
+    border-radius: 100%;
+    opacity: 50%
+}
+
+.possibleCapture {
+    height: 68px;
+    aspect-ratio: 1 / 1;
+    background-color: transparent;
+
+    border: 6px #1c1815 solid;
+    opacity: 40%;
+    border-radius: 100%;
+    
+    transform: translate(-3px, -63px);
+}
