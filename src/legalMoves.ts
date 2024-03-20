@@ -135,7 +135,7 @@ function getLegalMovesKnight(board: Cell[], cellIndex: number): Set<Cell> {
     return result
 }
 
-function getLegalMoves(board: Cell[], cellIndex: number): Set<Cell> {
+export function getLegalMoves(board: Cell[], cellIndex: number): Set<Cell> {
     let result: Set<Cell>
 
     switch (board[cellIndex].value & 0x0F) {
@@ -167,7 +167,7 @@ export function isLegal(board: Cell[], fromIndex: number, toIndex: number): bool
     let from: Cell = board[fromIndex]
     let to: Cell = board[toIndex]
     // STILL NEEDS TO CHECK IN CASE OF A CHECK
-    if( (from.value & 0x30) === (to.value & 0x30) )
+    if( (from.value & 0xF0) === (to.value & 0xF0) )
         return false
 
     // "getLegalMoves" function still not finished

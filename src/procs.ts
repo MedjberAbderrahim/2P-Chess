@@ -1,6 +1,6 @@
 import {boardElement, board, sides, nextTurn} from "./index.js"
 import {Cell, cellColor, cellValue, moveType, gameSide} from "./structs.js"
-import { isLegal, verifyIfCheckAfterMove } from "./legalMoves.js"
+import { isLegal, verifyIfCheckAfterMove, getLegalMoves } from "./legalMoves.js"
 
 function setCell(row: number, color: cellColor, value: cellValue, element: HTMLButtonElement) {
     return  {row: row, color: color, value: value, element: element}
@@ -159,6 +159,15 @@ function afterClick(src: HTMLButtonElement, dest: HTMLButtonElement) {
         makeMove( board[Number(src.id)], board[Number(dest.id)] )
 }
 
+function resetCells(targets: Set<Cell>) {
+    targets.forEach(cellElement => {
+        if(cellElement.element.children[0].tagName === "IMG")
+            cellElement.element.children[1].remove()
+        else
+            cellElement.element.children[0].remove()
+    });
+}
+
 export function waitForClick(event: MouseEvent) {
     let target = event.target as HTMLElement
 
@@ -184,16 +193,29 @@ export function waitForClick(event: MouseEvent) {
         child.style.opacity = "40%"
     }
 
+    let possibleMoves = getLegalMoves(board, Number(target.id))
+    possibleMoves.forEach((cellElement: Cell) => {
+        let legalMoveButton = document.createElement("button") as HTMLButtonElement
+        if(cellElement.value)
+            legalMoveButton.className = "possibleCapture"
+        else
+            legalMoveButton.className = "possibleMove"
+    
+        cellElement.element.append(legalMoveButton)
+    })
+
     boardElement.removeEventListener("click", waitForClick)
 
     boardElement.addEventListener("click", (event: MouseEvent) => {    
         let dest = event.target as HTMLElement
-        if(dest.tagName === "IMG"){
+        if(dest.tagName === "IMG" || dest.className === "possibleMove" || dest.className === "possibleCapture"){
             if(!dest.parentElement)
                 throw new Error("dest.parentElement is null");
 
             dest = dest.parentElement as HTMLButtonElement
         }
+
+        resetCells(possibleMoves)
         afterClick(target as HTMLButtonElement, dest as HTMLButtonElement)
 
         boardElement.addEventListener("click", waitForClick)

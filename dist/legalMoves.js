@@ -100,7 +100,7 @@ function getLegalMovesKnight(board, cellIndex) {
     }
     return result;
 }
-function getLegalMoves(board, cellIndex) {
+export function getLegalMoves(board, cellIndex) {
     let result;
     switch (board[cellIndex].value & 0x0F) {
         case cellValue.bPawn & 0x0F: /* Pawn */
@@ -125,7 +125,7 @@ export function isLegal(board, fromIndex, toIndex) {
     let from = board[fromIndex];
     let to = board[toIndex];
     // STILL NEEDS TO CHECK IN CASE OF A CHECK
-    if ((from.value & 0x30) === (to.value & 0x30))
+    if ((from.value & 0xF0) === (to.value & 0xF0))
         return false;
     // "getLegalMoves" function still not finished
     let legalMoves = getLegalMoves(board, fromIndex);

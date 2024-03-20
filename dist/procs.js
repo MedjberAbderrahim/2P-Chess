@@ -1,6 +1,6 @@
 import { boardElement, board, sides, nextTurn } from "./index.js";
 import { cellColor, cellValue, moveType } from "./structs.js";
-import { isLegal, verifyIfCheckAfterMove } from "./legalMoves.js";
+import { isLegal, verifyIfCheckAfterMove, getLegalMoves } from "./legalMoves.js";
 function setCell(row, color, value, element) {
     return { row: row, color: color, value: value, element: element };
 }
@@ -126,6 +126,14 @@ function afterClick(src, dest) {
     else
         makeMove(board[Number(src.id)], board[Number(dest.id)]);
 }
+function resetCells(targets) {
+    targets.forEach(cellElement => {
+        if (cellElement.element.children[0].tagName === "IMG")
+            cellElement.element.children[1].remove();
+        else
+            cellElement.element.children[0].remove();
+    });
+}
 export function waitForClick(event) {
     let target = event.target;
     if (target.tagName === "BUTTON") {
@@ -146,14 +154,24 @@ export function waitForClick(event) {
         let child = target.children[0];
         child.style.opacity = "40%";
     }
+    let possibleMoves = getLegalMoves(board, Number(target.id));
+    possibleMoves.forEach((cellElement) => {
+        let legalMoveButton = document.createElement("button");
+        if (cellElement.value)
+            legalMoveButton.className = "possibleCapture";
+        else
+            legalMoveButton.className = "possibleMove";
+        cellElement.element.append(legalMoveButton);
+    });
     boardElement.removeEventListener("click", waitForClick);
     boardElement.addEventListener("click", (event) => {
         let dest = event.target;
-        if (dest.tagName === "IMG") {
+        if (dest.tagName === "IMG" || dest.className === "possibleMove" || dest.className === "possibleCapture") {
             if (!dest.parentElement)
                 throw new Error("dest.parentElement is null");
             dest = dest.parentElement;
         }
+        resetCells(possibleMoves);
         afterClick(target, dest);
         boardElement.addEventListener("click", waitForClick);
     }, { once: true });
