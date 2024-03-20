@@ -1,22 +1,24 @@
-import {Cell, setBoard, waitForClick, gameSide} from "./procs.js"
+import {setBoard, waitForClick} from "./procs.js"
+import { gameSide, Cell } from "./structs.js"
 
 export const boardElement = document.querySelector("#boardContainer") as HTMLDivElement
 export const board: Cell[] = new Array(64)
-export let side: gameSide = gameSide.white
+export const sides = {
+    self: gameSide.white,
+    enemy: gameSide.black
+}
 
 setBoard(boardElement, board)
 
 export function nextTurn() {
-    if(side === gameSide.black)
-        side = gameSide.white
-    else if(side === gameSide.white)
-        side = gameSide.black
+    if(sides.self === gameSide.black){
+        sides.self = gameSide.white
+        sides.enemy = gameSide.black
+    }
+    else if(sides.self === gameSide.white){
+        sides.self = gameSide.black
+        sides.enemy = gameSide.white
+    }
 }
 
-
 boardElement.addEventListener("click", waitForClick)
-
-self.addEventListener("message", (message) => {
-    if(message.data === "add clickReact")
-        boardElement.addEventListener("click", waitForClick) 
-})
