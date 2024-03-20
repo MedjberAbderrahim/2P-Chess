@@ -1,39 +1,6 @@
-import { boardElement, board, side, nextTurn } from "./index.js";
-var cellColor;
-(function (cellColor) {
-    cellColor["white"] = "white";
-    cellColor["black"] = "black";
-})(cellColor || (cellColor = {}));
-var cellValue;
-(function (cellValue) {
-    cellValue[cellValue["empty"] = 0] = "empty";
-    cellValue[cellValue["wPawn"] = 17] = "wPawn";
-    cellValue[cellValue["wKnight"] = 19] = "wKnight";
-    cellValue[cellValue["wBishop"] = 20] = "wBishop";
-    cellValue[cellValue["wRook"] = 21] = "wRook";
-    cellValue[cellValue["wQueen"] = 25] = "wQueen";
-    cellValue[cellValue["wKing"] = 31] = "wKing";
-    cellValue[cellValue["bPawn"] = 33] = "bPawn";
-    cellValue[cellValue["bKnight"] = 35] = "bKnight";
-    cellValue[cellValue["bBishop"] = 36] = "bBishop";
-    cellValue[cellValue["bRook"] = 37] = "bRook";
-    cellValue[cellValue["bQueen"] = 41] = "bQueen";
-    cellValue[cellValue["bKing"] = 47] = "bKing";
-})(cellValue || (cellValue = {}));
-var moveType;
-(function (moveType) {
-    moveType[moveType["check"] = 0] = "check";
-    moveType[moveType["capture"] = 1] = "capture";
-    moveType[moveType["promote"] = 2] = "promote";
-    moveType[moveType["castle"] = 3] = "castle";
-    moveType[moveType["regularMove"] = 4] = "regularMove";
-})(moveType || (moveType = {}));
-export var gameSide;
-(function (gameSide) {
-    gameSide[gameSide["none"] = 0] = "none";
-    gameSide[gameSide["white"] = 1] = "white";
-    gameSide[gameSide["black"] = 2] = "black";
-})(gameSide || (gameSide = {}));
+import { boardElement, board, sides, nextTurn } from "./index.js";
+import { cellColor, cellValue, moveType } from "./structs.js";
+import { isLegal, verifyIfCheckAfterMove } from "./legalMoves.js";
 function setCell(row, color, value, element) {
     return { row: row, color: color, value: value, element: element };
 }
@@ -104,35 +71,26 @@ export function setBoard(boardElement, board) {
         boardElement.append(rowElement);
     }
 }
-function isCheck(board, side) {
+export function isCheck(board, side) {
     board;
     side;
-    throw new Error("Function not implemented.");
+    return false;
+    // throw new Error("Function not implemented.")
 }
-function getMoveType(from, to) {
-    from;
-    let val = to.value;
-    if (isCheck(board, side))
+function getMoveType(fromIndex, toIndex) {
+    board[fromIndex];
+    if (verifyIfCheckAfterMove(board, fromIndex, toIndex, sides.enemy))
         return moveType.check;
-    if (to.value !== cellValue.empty)
+    if (board[toIndex].value !== cellValue.empty)
         return moveType.capture;
-    // idk why it is throwing error here:
-    // "This comparison appears to be unintentional because the types 'cellValue.empty' and 'cellValue.bPawn' have no overlap.ts(2367)"
-    // so I added "as cellValue"
-    if (((to.row === 1) && (val === cellValue.bPawn)) || ((to.row === 8) && (val === cellValue.wPawn)))
+    if (((board[toIndex].row === 1) && (board[toIndex].value === cellValue.bPawn)) || ((board[toIndex].row === 8) && (board[toIndex].value === cellValue.wPawn)))
         return moveType.promote;
     // if(castle())   /* not yet implemented */
     //     return moveType.castle
     return moveType.regularMove;
 }
 function makeMove(from, to) {
-    to.value = from.value;
-    to.element.innerHTML = from.element.innerHTML;
-    from.element.innerHTML = "";
-    from.value = cellValue.empty;
-    let img = to.element.children[0];
-    img.style.opacity = "1";
-    switch (getMoveType(from, to)) {
+    switch (getMoveType(Number(from.element.id), Number(to.element.id))) {
         case moveType.check:
             new Audio("Audio/check.mp3").play();
             break;
@@ -151,28 +109,17 @@ function makeMove(from, to) {
         default:
             throw new Error("ERROR! [getMoveType() in makeMove]: returned invalid value");
     }
+    to.value = from.value;
+    to.element.innerHTML = from.element.innerHTML;
+    from.element.innerHTML = "";
+    from.value = cellValue.empty;
+    let img = to.element.children[0];
+    img.style.opacity = "1";
     nextTurn();
 }
-function getLegalMoves(cellIndex) {
-    let cell = board[cellIndex];
-    cell;
-    return [];
-}
-function isLegal(fromIndex, toIndex) {
-    let from = board[fromIndex];
-    let to = board[toIndex];
-    // STILL NEEDS TO CHECK IN CASE OF A CHECK
-    if ((from.value & 0x30) === (to.value & 0x30))
-        return false;
-    // "getLegalMoves" function still not started
-    let legalMoves = getLegalMoves(fromIndex);
-    if (legalMoves.includes(to))
-        return true;
-    return false;
-}
 function afterClick(src, dest) {
-    if (!isLegal(Number(src.id), Number(dest.id))) {
-        alert("Invalid move!");
+    if (!isLegal(board, Number(src.id), Number(dest.id))) {
+        alert("Illegal move!");
         let img = src.children[0];
         img.style.opacity = "1";
     }
@@ -184,13 +131,15 @@ export function waitForClick(event) {
     if (target.tagName === "BUTTON") {
         if (!target.children[0]) /* Empty cell */
             return;
-        else if ((board[Number(target.id)].value & 0xF0) !== side) /* Enemy's piece */
+        else if ((board[Number(target.id)].value & 0xF0) !== (sides.self * 0x10)) /* Enemy's piece */
             return;
     }
     if (target.tagName === "IMG") {
-        target.style.opacity = "40%";
         if (!target.parentElement)
             throw new Error("target.parentElement is null");
+        if ((board[Number(target.parentElement.id)].value & 0xF0) !== (sides.self * 0x10)) /* Enemy's piece */
+            return;
+        target.style.opacity = "40%";
         target = target.parentElement;
     }
     else {
@@ -198,7 +147,7 @@ export function waitForClick(event) {
         child.style.opacity = "40%";
     }
     boardElement.removeEventListener("click", waitForClick);
-    function clickReact(event) {
+    boardElement.addEventListener("click", (event) => {
         let dest = event.target;
         if (dest.tagName === "IMG") {
             if (!dest.parentElement)
@@ -206,7 +155,6 @@ export function waitForClick(event) {
             dest = dest.parentElement;
         }
         afterClick(target, dest);
-        window.postMessage("add clickReact");
-    }
-    boardElement.addEventListener("click", clickReact, { once: true });
+        boardElement.addEventListener("click", waitForClick);
+    }, { once: true });
 }

@@ -1,48 +1,6 @@
-import {boardElement, board, side, nextTurn} from "./index.js"
-
-enum cellColor {
-    white = "white",
-    black = "black"
-}
-
-enum cellValue {
-    empty   =   0x00,
-
-    wPawn   =   0x11,
-    wKnight =   0x13,
-    wBishop =   0x14,
-    wRook   =   0x15,
-    wQueen  =   0x19,
-    wKing   =   0x1F,
-
-    bPawn   =   0x21,
-    bKnight =   0x23,
-    bBishop =   0x24,
-    bRook   =   0x25,
-    bQueen  =   0x29,
-    bKing   =   0x2F
-}
-
-enum moveType {
-    check,
-    capture,
-    promote,
-    castle,
-    regularMove
-}
-
-export enum gameSide {
-    none,
-    white,
-    black
-}
-
-export type Cell = {
-    readonly row: number
-    readonly color: cellColor
-    value: cellValue
-    readonly element: HTMLButtonElement
-}
+import {boardElement, board, sides, nextTurn} from "./index.js"
+import {Cell, cellColor, cellValue, moveType, gameSide} from "./structs.js"
+import { isLegal, verifyIfCheckAfterMove } from "./legalMoves.js"
 
 function setCell(row: number, color: cellColor, value: cellValue, element: HTMLButtonElement) {
     return  {row: row, color: color, value: value, element: element}
@@ -129,26 +87,22 @@ export function setBoard(boardElement: HTMLDivElement, board: Cell[]) {
     }
 }
 
-function isCheck(board: Cell[], side: gameSide): boolean {
+export function isCheck(board: Cell[], side: gameSide): boolean {
     board;
     side;
-    throw new Error("Function not implemented.")
+    return false
+    // throw new Error("Function not implemented.")
 }
 
-function getMoveType(from: Cell, to: Cell): moveType {
-    from;
-    let val = to.value
-    if(isCheck(board, side))
+function getMoveType(fromIndex: number, toIndex: number): moveType {
+    board[fromIndex];
+    if(verifyIfCheckAfterMove(board, fromIndex, toIndex, sides.enemy))
         return moveType.check
 
-    if(to.value !== cellValue.empty)
+    if(board[toIndex].value !== cellValue.empty)
         return moveType.capture
 
-    // idk why it is throwing error here:
-    // "This comparison appears to be unintentional because the types 'cellValue.empty' and 'cellValue.bPawn' have no overlap.ts(2367)"
-    // so I added "as cellValue"
-
-    if( ((to.row === 1) && (val === cellValue.bPawn)) || ((to.row === 8) && (val === cellValue.wPawn)) )
+    if( ((board[toIndex].row === 1) && (board[toIndex].value === cellValue.bPawn)) || ((board[toIndex].row === 8) && (board[toIndex].value === cellValue.wPawn)) )
         return moveType.promote
 
     // if(castle())   /* not yet implemented */
@@ -158,16 +112,7 @@ function getMoveType(from: Cell, to: Cell): moveType {
 }
 
 function makeMove(from: Cell, to: Cell) {
-    to.value = from.value
-    to.element.innerHTML = from.element.innerHTML
-    
-    from.element.innerHTML = ""
-    from.value = cellValue.empty
-
-    let img = to.element.children[0] as HTMLImageElement
-    img.style.opacity = "1"
-
-    switch (getMoveType(from, to)) {
+    switch (getMoveType(Number(from.element.id), Number(to.element.id))) {
         case moveType.check:
             new Audio("Audio/check.mp3").play()
             break;
@@ -192,33 +137,21 @@ function makeMove(from: Cell, to: Cell) {
             throw new Error("ERROR! [getMoveType() in makeMove]: returned invalid value");
     }
 
+    to.value = from.value
+    to.element.innerHTML = from.element.innerHTML
+
+    from.element.innerHTML = ""
+    from.value = cellValue.empty
+
+    let img = to.element.children[0] as HTMLImageElement
+    img.style.opacity = "1"
+
     nextTurn()
 }
 
-function getLegalMoves(cellIndex: number): Cell[] {
-    let cell: Cell = board[cellIndex]
-    cell;
-    return []
-}
-
-function isLegal(fromIndex: number, toIndex: number): boolean {
-    let from: Cell = board[fromIndex]
-    let to: Cell = board[toIndex]
-    // STILL NEEDS TO CHECK IN CASE OF A CHECK
-    if( (from.value & 0x30) === (to.value & 0x30) )
-        return false
-
-    // "getLegalMoves" function still not started
-    let legalMoves: Cell[] = getLegalMoves(fromIndex)
-    if(legalMoves.includes(to))
-        return true
-
-    return false
-}
-
 function afterClick(src: HTMLButtonElement, dest: HTMLButtonElement) {
-    if(!isLegal(Number(src.id), Number(dest.id))){
-        alert("Invalid move!")
+    if(!isLegal(board, Number(src.id), Number(dest.id))){
+        alert("Illegal move!")
         let img = src.children[0] as HTMLImageElement
         img.style.opacity = "1"
     }
@@ -228,19 +161,21 @@ function afterClick(src: HTMLButtonElement, dest: HTMLButtonElement) {
 
 export function waitForClick(event: MouseEvent) {
     let target = event.target as HTMLElement
+
     if(target.tagName === "BUTTON"){
         if(!target.children[0])  /* Empty cell */
             return
-
-        else if ((board[Number(target.id)].value & 0xF0) !== side)  /* Enemy's piece */
+        else if ((board[Number(target.id)].value & 0xF0) !== (sides.self * 0x10))  /* Enemy's piece */
             return
     }
 
     if(target.tagName === "IMG"){
-        target.style.opacity = "40%"
-        
         if(!target.parentElement)
             throw new Error("target.parentElement is null");
+
+        if ((board[Number(target.parentElement.id)].value & 0xF0) !== (sides.self * 0x10))  /* Enemy's piece */
+            return
+        target.style.opacity = "40%"
         
         target = target.parentElement as HTMLButtonElement
     }
@@ -251,7 +186,7 @@ export function waitForClick(event: MouseEvent) {
 
     boardElement.removeEventListener("click", waitForClick)
 
-    function clickReact(event: MouseEvent) {
+    boardElement.addEventListener("click", (event: MouseEvent) => {    
         let dest = event.target as HTMLElement
         if(dest.tagName === "IMG"){
             if(!dest.parentElement)
@@ -261,8 +196,7 @@ export function waitForClick(event: MouseEvent) {
         }
         afterClick(target as HTMLButtonElement, dest as HTMLButtonElement)
 
-        window.postMessage("add clickReact")
-    }
-
-    boardElement.addEventListener("click", clickReact, {once: true})
+        boardElement.addEventListener("click", waitForClick)
+    },
+    {once: true})
 }
