@@ -132,7 +132,7 @@ function makeMove(from: Cell, to: Cell) {
         case moveType.regularMove:
             new Audio("Audio/move.mp3").play()
             break;
-        
+
         default:
             throw new Error("ERROR! [getMoveType() in makeMove]: returned invalid value");
     }
@@ -150,10 +150,16 @@ function makeMove(from: Cell, to: Cell) {
 }
 
 function afterClick(src: HTMLButtonElement, dest: HTMLButtonElement) {
-    if(!isLegal(board, Number(src.id), Number(dest.id))){
+    if(src === dest || (board[Number(src.id)].value & 0xF0) === (board[Number(dest.id)].value & 0xF0)){
+        let img = src.children[0] as HTMLImageElement
+        img.style.opacity = "1"
+        return
+    }
+    else if(!isLegal(board, Number(src.id), Number(dest.id))){
         alert("Illegal move!")
         let img = src.children[0] as HTMLImageElement
         img.style.opacity = "1"
+        return
     }
     else
         makeMove( board[Number(src.id)], board[Number(dest.id)] )
@@ -184,13 +190,13 @@ export function waitForClick(event: MouseEvent) {
 
         if ((board[Number(target.parentElement.id)].value & 0xF0) !== (sides.self * 0x10))  /* Enemy's piece */
             return
-        target.style.opacity = "40%"
+        target.style.opacity = "70%"
         
         target = target.parentElement as HTMLButtonElement
     }
     else{
         let child = target.children[0] as HTMLImageElement
-        child.style.opacity = "40%"
+        child.style.opacity = "70%"
     }
 
     let possibleMoves = getLegalMoves(board, Number(target.id))
